@@ -1,0 +1,33 @@
+var originalURL = "http://livescore-api.com/api-client/scores/live.json?key=gop822jNO6z33GAq&secret=iglZeHtSNGjCucWKAmTCocqdiZhlGSMY";
+var queryURL = "https://cors-anywhere.herokuapp.com/" + originalURL;
+var matchs = {};
+
+$.ajax({
+  url: queryURL,
+  method: "GET",
+  dataType: "json",
+  // this headers section is necessary for CORS-anywhere
+  headers: {
+	"x-requested-with": "xhr" 
+  }
+}).done(function(response) {
+		var result = response.data;
+		
+		for (var i = 0; i < result.match.length; i++) {
+		console.log('hahaha');
+		console.log(result.match.length);
+			var matchdata = result['match'][i];
+			var matchid = matchdata.id;
+			matchs[matchdata.league_name] = {};
+			if(matchs[matchdata.league_name].length != 0) {
+				matchs[matchdata.league_name][matchid] = [];
+			}
+		
+			 	matchs[matchdata.league_name][matchid] = matchdata;
+			console.log(matchs);
+		
+		}
+		console.log(result);	
+}).fail(function(jqXHR, textStatus) { 
+  console.error(textStatus)
+});

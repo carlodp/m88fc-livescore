@@ -1,0 +1,35 @@
+#live-score-container {
+    width: 50%;
+    border: 5px solid #1c2944;
+}
+
+#live-score-container thead {
+    background: #d2151b;
+    color: #fff;
+}
+
+#live-score-container thead th {
+    padding: 10px;
+}
+
+#live-score-container .league-title {
+    background: #fad32b;
+    height: 35px;
+}
+
+#live-score-container .league-title td {
+    padding: 10px 15px;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+#live-score-container .match-single td {
+    padding: 10px 0;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+#live-score-container .match-single {
+    background-color: #1c2944;
+    color: #fff;
+}
