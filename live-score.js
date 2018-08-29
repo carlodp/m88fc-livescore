@@ -2,8 +2,8 @@ var originalURL = "http://livescore-api.com/api-client/scores/live.json?key=gop8
 var queryURL = "https://cors-anywhere.herokuapp.com/" + originalURL;
 var matchs = {};
 
-var add_minutes =  function (dt, minutes) {
-	return new Date(dt.getTime() + minutes*60000);
+var adjustMinutes =  function (dt, minutes, add) {
+	return (add) ? new Date(dt.getTime() + minutes*60000) : new Date(dt.getTime() - minutes*60000);
 }
 var addZero = function (i) {
     if (i < 10) {
@@ -11,8 +11,8 @@ var addZero = function (i) {
     }
     return i;
 }
-var addTimeToDate = function (thedate) {
-	var matchEnded = new Date((add_minutes(new Date(thedate), 420).toString()));
+var addTimeToDate = function (thedate, secnds, add) {
+	var matchEnded = new Date((adjustMinutes(new Date(thedate), secnds, add).toString()));
 	var getDay = addZero(matchEnded.getDate());
 	var getMonth = addZero(matchEnded.getMonth() + 1);
 	var getYear = matchEnded.getFullYear();
@@ -29,7 +29,7 @@ $.ajax({
 		"x-requested-with": "xhr"
 	}
 }).done(function(response) {
-	$('#live-score-container thead').append('<tr><th width="20%">Match Status</th><th>Match Event</th><th width="20%">Match Score</th><th width="20%">Match Winner</th></tr>');
+	$('#live-score-container thead').append('<tr><th width="20%">Match Status</th><th>Match Event</th><th width="20%">Match Score</th><th width="20%">Match Winner</th><th>Match Ended</th></tr>');
 	
 	var result = response.data;
 	var matchObj = {};
@@ -39,12 +39,23 @@ $.ajax({
 	});
 	
 	$.each(matchObj, function(i, value){
-		$('#live-score-container tbody').append('<tr class="league-title"><td></td><td>'+i+'</td><td></td><td></td></tr>')
+		$('#live-score-container tbody').append('<tr class="league-title"><td colspan="5">'+i+'</td></tr>')
 		$.each(this, function(){
-			var matchEnd = addTimeToDate(this.last_changed);
-			var matchStart = addTimeToDate(this.added);
-			var currentDate = addTimeToDate(new Date());
-			console.log(currentDate);
+			var matchEnd = addTimeToDate(this.last_changed, 420, true);
+			var matchStart = addTimeToDate(this.added, 420, true);
+			var currentDate = addTimeToDate(new Date(), 60, false);
+			var timeDiff = ((new Date(currentDate).getTime() - new Date(matchEnd).getTime()) / 1000);
+			switch(true) {
+				case timeDiff <= 59:
+					timeDiff = Math.floor(timeDiff) +"s ago";
+					break;
+				case timeDiff <= 3599:
+					timeDiff = Math.floor((timeDiff / 60)) +"m ago";
+					break;
+				default:
+					timeDiff = Math.floor((timeDiff / 3600)) +"h ago";
+					break;
+			}
 			
 			var matchWinner;
 				score = this.score.split('-');
@@ -60,10 +71,10 @@ $.ajax({
 				<td class="match-teams"><span class="match-home-team">'+this.home_name+'</span><br/><span class="match-away-team">'+this.away_name+'</span></td>\
 				<td class="match-score">'+this.score+'</td>\
 				<td class="match-winner">'+((this.status == "FINISHED") ? matchWinner : ' Match Ongoing.' )+'</td>\
+				<td class="match-ended">'+matchEnd+'<br/>'+timeDiff+'</td>\
 			</tr>');
 		});
 	});
-	console.log(matchObj);
 }).fail(function(jqXHR, textStatus) {
 	console.error(textStatus)
 });
